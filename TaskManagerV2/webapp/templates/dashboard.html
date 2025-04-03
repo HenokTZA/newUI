@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Task Management App</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Roboto', sans-serif;
+      padding-top: 70px;
+    }
+    /* Main container styling */
+    .container.main-container {
+      max-width: 800px;
+      margin: 80px auto 20px;
+    }
+    /* Navbar adjustments */
+    .navbar .btn-secondary {
+      margin-left: auto;
+    }
+    /* Subscription Plan Cards (Unsubscribed Users) */
+    .subscription-card {
+      border: 2px dashed #ccc;
+      background-color: #fff;
+      border-radius: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 20px;
+      height: 320px; /* Fixed height for consistency */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .subscription-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    .subscription-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .subscription-description {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+    .btn-subscribe {
+      background-color: #6c63ff;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+    }
+    .btn-subscribe:hover {
+      background-color: #5a54d1;
+    }
+    /* Subscription Details Card (Subscribed Users) */
+    .subscription-details-card {
+      border: 2px dashed #ccc;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      margin-bottom: 20px;
+    }
+    .subscription-details-card h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .subscription-details-table th,
+    .subscription-details-table td {
+      padding: 8px;
+      vertical-align: middle;
+    }
+    .subscription-details-table th {
+      width: 40%;
+      text-align: left;
+    }
+    .btn-unsubscribe {
+      background-color: #6c63ff;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-top: 15px;
+      display: block;
+      width: 50%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn-unsubscribe:hover {
+      background-color: #5a54d1;
+    }
+    .btn-unsubscribe:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+    /* Server Status Indicator */
+    .status-indicator {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .online {
+      background-color: #28a745;
+      animation: blink 1s infinite;
+    }
+    .offline {
+      background-color: #dc3545;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar with Logout on the right -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Task Management App</a>
+      <div class="d-flex">
+        <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container main-container">
+    <h1 class="mb-4">Welcome, {{ user.first_name }}!</h1>
+    <p class="mb-4">Our Task Management App helps you organize and track your tasks seamlessly.</p>
+    
+    {% if container %}
+      <!-- For Subscribed Users: Display Subscription Details -->
+      <h3 class="mb-3">Your Subscription</h3>
+      <div class="subscription-details-card">
+        <h2>Enterprise</h2>
+        <table class="table subscription-details-table">
+          <tr>
+            <th>Container ID</th>
+            <td>{{ container.unique_id }}</td>
+          </tr>
+          <tr>
+            <th>Frontend Port</th>
+            <td>{{ container.frontend_port }}</td>
+          </tr>
+          <tr>
+            <th>Backend Port</th>
+            <td>{{ container.backend_port }}</td>
+          </tr>
+          <tr>
+            <th>CouchDB Port</th>
+            <td>{{ container.couchdb_port }}</td>
+          </tr>
+          <tr>
+            <th>Redis Port</th>
+            <td>{{ container.redis_port }}</td>
+          </tr>
+          <tr>
+            <th>Server IP</th>
+            <td>{{ server_ip }}</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <div style="display:inline-block;">
+                <div id="server-status-indicator" class="status-indicator offline"></div>
+              </div>
+              <span id="server-status-text">Checking...</span>
+            </td>
+          </tr>
+        </table>
+        <a href="#" class="btn-unsubscribe" disabled>Unsubscribe</a>
+      </div>
+    {% else %}
+      <!-- For Unsubscribed Users: Display Subscription Plan Cards -->
+      <h3 class="mb-3">Subscription Plans</h3>
+      <p class="mb-4">Choose a subscription plan to get your own dedicated environment with all features enabled.</p>
+      <div class="row">
+        <!-- Basic Subscription -->
+        <div class="col-md-4">
+          <div class="subscription-card">
+            <div>
+              <h2 class="subscription-title">Basic</h2>
+              <p class="subscription-description">
+                Ideal for individuals and small projects. Enjoy essential features to get started.
+              </p>
+            </div>
+            <a href="{% url 'subscribe' %}" class="btn-subscribe">Subscribe Now</a>
+          </div>
+        </div>
+        <!-- Pro Subscription -->
+        <div class="col-md-4">
+          <div class="subscription-card">
+            <div>
+              <h2 class="subscription-title">Pro</h2>
+              <p class="subscription-description">
+                Perfect for professionals. Unlock advanced features and enhanced support.
+              </p>
+            </div>
+            <a href="{% url 'subscribe' %}" class="btn-subscribe">Subscribe Now</a>
+          </div>
+        </div>
+        <!-- Enterprise Subscription -->
+        <div class="col-md-4">
+          <div class="subscription-card">
+            <div>
+              <h2 class="subscription-title">Enterprise</h2>
+              <p class="subscription-description">
+                Best for large organizations. Get custom solutions and premium support.
+              </p>
+            </div>
+            <a href="{% url 'subscribe' %}" class="btn-subscribe">Subscribe Now</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  
+  {% if container %}
+  <script>
+    // JavaScript to ping the server (Server IP + Frontend Port) and update status
+    var serverIp = "{{ server_ip }}";
+    var frontendPort = "{{ container.frontend_port }}";
+    
+    function checkServerStatus() {
+      var url = "http://" + serverIp + ":" + frontendPort;
+      // Attempt a fetch request in no-cors mode
+      fetch(url, { mode: 'no-cors' }).then(function(response) {
+        setStatus("online");
+      }).catch(function(error) {
+        setStatus("offline");
+      });
+    }
+    
+    function setStatus(status) {
+      var indicator = document.getElementById("server-status-indicator");
+      var statusText = document.getElementById("server-status-text");
+      if(status === "online"){
+        indicator.classList.remove("offline");
+        indicator.classList.add("online");
+        statusText.textContent = "Online";
+      } else {
+        indicator.classList.remove("online");
+        indicator.classList.add("offline");
+        statusText.textContent = "Offline";
+      }
+    }
+    
+    // Initial status check and repeat every 5 seconds
+    checkServerStatus();
+    setInterval(checkServerStatus, 5000);
+  </script>
+  {% endif %}
+</body>
+</html>

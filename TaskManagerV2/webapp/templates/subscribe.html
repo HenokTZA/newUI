@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subscribe - Task Management App</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body { background-color: #f8f9fa; }
+    .subscription-container {
+      margin: 50px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container subscription-container">
+    <h2>Subscribe to Our Task Management App</h2>
+    <p>User: {{ user.first_name }} {{ user.last_name }} ({{ user.email }})</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Card Number</label>
+        <input type="text" name="cardNumber" class="form-control" placeholder="Enter card number" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Expiry Date</label>
+        <input type="text" name="expiryDate" class="form-control" placeholder="MM/YY" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">CVV</label>
+        <input type="text" name="cvv" class="form-control" placeholder="CVV" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Subscribe Now</button>
+    </form>
+  </div>
+</body>
+</html>
